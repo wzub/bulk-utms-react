@@ -3,12 +3,12 @@ const axios = require("axios");
 exports.handler = async (event, context) => {
 	// console.log("event", JSON.stringify(event));
 	// console.log("context", JSON.stringify(context));
-	// console.log("context", JSON.stringify(context.clientContext.user.email));
+	console.log("context", JSON.stringify(context));
 
 	// @TODO: only proceed if valid firebase accessToken
-
-	const user = context.clientContext.user.email,
-		body = JSON.parse(event.body),
+	//user = context.clientContext.user,
+		
+	const body = JSON.parse(event.body),
 		{ url } = body.params,
 		config = {
 			token: process.env.BITLY_TOKEN,
