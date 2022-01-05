@@ -3,7 +3,7 @@ const axios = require("axios");
 exports.handler = async (event, context) => {
 	console.log("event", event);
 	// console.log("context", JSON.stringify(context));
-	// console.log("context", context);
+	console.log("context", context);
 
 	// @TODO: only proceed if valid firebase accessToken
 	//user = context.clientContext.user,

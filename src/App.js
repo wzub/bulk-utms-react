@@ -237,14 +237,14 @@ function App() {
 			options = {
 				method: "POST",
 				headers: {
-					Authorization: `Bearer ${auth.currentUser.accessToken}`,
+					"Authorization": `Bearer ${auth.currentUser.accessToken}`,
 					"Content-Type": "application/json",
 				},
 				url: "/.netlify/functions/shorten",
 				data: JSON.stringify({
 					url: url_display.textContent,
 				}),
-			};;
+			};
 
 		// button_icon.classList.add("spinner-border", "spinner-border-sm");
 		// button_icon.classList.remove("bi-lightning-charge-fill");
@@ -263,42 +263,6 @@ function App() {
 			button_text.textContent = "Retry";
 			console.log("error", error);
 		});
-		
-
-		/*
-		axios
-			.post("/.netlify/functions/shorten", {
-				params: {
-					url: url_display.textContent,
-					// accessToken: auth.currentUser.accessToken,
-				}
-			},
-			{
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${auth.currentUser.accessToken}`
-				  }
-			})
-			.then((response) => {
-				// button_icon.classList.remove(
-				// 	"spinner-border",
-				// 	"spinner-border-sm"
-				// );
-				// button_icon.classList.add("bi-lightning-charge-fill");
-
-				if (response.status === 200) {
-					button_text.textContent = "Make";
-					shorturl_display.textContent = response.data;
-				} else {
-					button_text.textContent = "Retry";
-					return Promise.reject(response.status);
-				}
-			})
-			.catch((err) => {
-				button_text.textContent = "Retry";
-				console.log("error", err);
-			});
-		*/
 	};
 
 	const handleLogout = async (e) => {
