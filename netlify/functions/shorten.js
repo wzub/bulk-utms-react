@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 exports.handler = async (event, context) => {
-	console.log("event", event);
+	// console.log("event", event);
 	// console.log("context", JSON.stringify(context));
 	console.log("context", context);
 
@@ -36,7 +36,7 @@ exports.handler = async (event, context) => {
 				group_guid: config.group_guid,
 			}),
 		},
-		user = context.clientContext?.user;
+		token = context.clientContext?.identity?.token;
 
 	if (allowed_urls.includes(urlObj.hostname) === false) {
 		return {
@@ -45,7 +45,7 @@ exports.handler = async (event, context) => {
 		  }
 	}
 
-	if (user) {
+	if (token) {
 		return await axios(options)
 			.then((response) => {
 				return {
