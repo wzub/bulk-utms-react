@@ -6,9 +6,18 @@ exports.handler = async (event, context) => {
 	console.log("context", context);
 
 	// @TODO: only proceed if valid firebase accessToken
-	//user = context.clientContext.user,
 
 	const { url } = JSON.parse(event.body),
+		urlObj = new URL(url),
+		allowed_urls = [
+			"tcf.org.pk",
+			"tcfusa.org",
+			"tcfcanada.org",
+			"tcf-uk.org",
+			"tcfaustralia.org",
+			"tcfnorway.org",
+			"tcfitalia.org",
+		],
 		config = {
 			token: process.env.BITLY_TOKEN,
 			group_guid: "",
@@ -21,13 +30,20 @@ exports.handler = async (event, context) => {
 			},
 			url: "https://api-ssl.bitly.com/v4/shorten",
 			data: JSON.stringify({
-				long_url: url,
+				long_url: urlObj.toString(),
 				domain: "bit.ly",
 				tags: ["bulk-utm-builder", "api"],
 				group_guid: config.group_guid,
 			}),
 		},
 		user = context.clientContext?.user;
+
+	if (allowed_urls.includes(urlObj.hostname) === false) {
+		return {
+			statusCode: 401,
+			body: JSON.stringify('Disallowed domain')
+		  }
+	}
 
 	if (user) {
 		return await axios(options)
