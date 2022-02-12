@@ -1,15 +1,23 @@
 const axios = require("axios");
 
 exports.handler = async (event, context) => {
-	// console.log("event", JSON.stringify(event));
+	// console.log("event", event);
 	// console.log("context", JSON.stringify(context));
-	// console.log("context", JSON.stringify(context.clientContext.user.email));
+	console.log("context", context);
 
 	// @TODO: only proceed if valid firebase accessToken
 
-	const user = context.clientContext.user.email,
-		body = JSON.parse(event.body),
-		{ url } = body.params,
+	const { url } = JSON.parse(event.body),
+		urlObj = new URL(url),
+		allowed_urls = [
+			"tcf.org.pk",
+			"tcfusa.org",
+			"tcfcanada.org",
+			"tcf-uk.org",
+			"tcfaustralia.org",
+			"tcfnorway.org",
+			"tcfitalia.org",
+		],
 		config = {
 			token: process.env.BITLY_TOKEN,
 			group_guid: "",
@@ -22,31 +30,47 @@ exports.handler = async (event, context) => {
 			},
 			url: "https://api-ssl.bitly.com/v4/shorten",
 			data: JSON.stringify({
-				long_url: url,
+				long_url: urlObj.toString(),
 				domain: "bit.ly",
 				tags: ["bulk-utm-builder", "api"],
 				group_guid: config.group_guid,
 			}),
-		};
+		},
+		token = context.clientContext?.identity?.token;
 
-	return await axios(options)
-		.then((response) => {
-			return {
-				statusCode: 200,
-				body: JSON.stringify(response.data.link),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			};
-		})
-		.catch((error) => {
-			// console.log(error);
-			return {
-				statusCode: error.response.status,
-				body: `Error ${error.response.status}: ${error.response.statusText}`,
-				headers: {
-					"Content-Type": "application/json",
-				},
-			};
-		});
+	if (allowed_urls.includes(urlObj.hostname) === false) {
+		return {
+			statusCode: 401,
+			body: JSON.stringify('Disallowed domain')
+		  }
+	}
+
+	if (token) {
+		return await axios(options)
+			.then((response) => {
+				return {
+					statusCode: 200,
+					body: JSON.stringify(response.data.link),
+					headers: {
+						"Content-Type": "application/json",
+					},
+				};
+			})
+			.catch((error) => {
+				// console.log(error);
+				return {
+					statusCode: error.response.status,
+					body: `Error ${error.response.status}: ${error.response.statusText}`,
+					headers: {
+						"Content-Type": "application/json",
+					},
+				};
+			});
+	}
+	else {
+		return {
+			statusCode: 401,
+			body: JSON.stringify('Unauthorised')
+		  }
+	}
 };

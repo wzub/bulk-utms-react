@@ -225,7 +225,7 @@ function App() {
 		document.body.removeChild(link);
 	};
 
-	const makeShortUrl = (e) => {
+	const makeShortUrl = async (e) => {
 		const button = e.currentTarget,
 			// button_icon = e.currentTarget.querySelector("i"),
 			button_text = e.currentTarget.querySelector("span"),
@@ -233,44 +233,36 @@ function App() {
 			url_display = document.querySelector(`pre#${shortlink_for} > code`),
 			shorturl_display = document.querySelector(
 				`pre#${shortlink_for}_shortlink code`
-			);
+			),
+			options = {
+				method: "POST",
+				headers: {
+					"Authorization": `Bearer ${auth.currentUser.accessToken}`,
+					"Content-Type": "application/json",
+				},
+				url: "/.netlify/functions/shorten",
+				data: JSON.stringify({
+					url: url_display.textContent,
+				}),
+			};
 
 		// button_icon.classList.add("spinner-border", "spinner-border-sm");
 		// button_icon.classList.remove("bi-lightning-charge-fill");
 		button_text.textContent = "Making...";
 
-		axios
-			.post("/.netlify/functions/shorten", {
-				params: {
-					url: url_display.textContent,
-					// accessToken: auth.currentUser.accessToken,
-				}
-			},
-			{
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${auth.currentUser.accessToken}`
-				  }
-			})
-			.then((response) => {
-				// button_icon.classList.remove(
-				// 	"spinner-border",
-				// 	"spinner-border-sm"
-				// );
-				// button_icon.classList.add("bi-lightning-charge-fill");
-
-				if (response.status === 200) {
-					button_text.textContent = "Make";
-					shorturl_display.textContent = response.data;
-				} else {
-					button_text.textContent = "Retry";
-					return Promise.reject(response.status);
-				}
-			})
-			.catch((err) => {
+		await axios(options).then((response) => {
+			if (response.status === 200) {
+				button_text.textContent = "Make";
+				shorturl_display.textContent = response.data;
+			} else {
 				button_text.textContent = "Retry";
-				console.log("error", err);
-			});
+				return Promise.reject(response.status);
+			}
+		})
+		.catch((error) => {
+			button_text.textContent = "Retry";
+			console.log("error", error);
+		});
 	};
 
 	const handleLogout = async (e) => {
